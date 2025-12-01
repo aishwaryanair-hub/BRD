@@ -1,4 +1,4 @@
-# Business Requirements Document: Accessibility Testing
+# Web Accessibility of Portal
 
 ## Requirement Title 1: Accessibility Testing
 
