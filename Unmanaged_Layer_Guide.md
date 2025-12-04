@@ -1,282 +1,256 @@
 # Unmanaged Layer - Explanation Guide
 
 ## Overview
-An "unmanaged layer" refers to a component or layer in a system architecture that is **not managed** by a framework, container, or automated system. The term is used in contrast to "managed layers" which are automatically handled by infrastructure or frameworks.
+"Unmanaged layer" is a term used in different contexts, most commonly in **Salesforce** development, but also in software architecture and cloud infrastructure. This guide explains the concept across different contexts.
 
 ---
 
-## Common Contexts
+## 1. Salesforce: Unmanaged Layer (Most Common Context)
 
-### 1. Software Architecture / Application Layers
+### What is an Unmanaged Layer?
 
-#### Unmanaged Layer
-- **Definition**: Code/components that you manually control and manage
-- **Characteristics**:
-  - You write and maintain all the code
-  - No automatic lifecycle management
-  - You handle initialization, cleanup, error handling
-  - Direct control over resources
-  - More flexibility, more responsibility
+In Salesforce, an **unmanaged layer** refers to components that exist in your Salesforce org but are **NOT part of a managed package**. These are customizations you create directly in your org.
 
-#### Managed Layer
-- **Definition**: Components managed by a framework/container
-- **Characteristics**:
-  - Framework handles lifecycle (creation, destruction)
-  - Automatic dependency injection
-  - Built-in error handling
-  - Less code to write
-  - Less direct control
+### Key Characteristics:
 
-**Example:**
+**Unmanaged Components:**
+- ✅ Created directly in your Salesforce org
+- ✅ Fully editable and customizable
+- ✅ Not packaged or versioned
+- ✅ Can be deleted or modified at any time
+- ✅ Specific to your org
+- ✅ Not distributed to other orgs
+
+**Managed Components (for comparison):**
+- 📦 Part of a managed package
+- 🔒 Locked/protected from direct editing
+- 📌 Versioned and controlled by package developer
+- 🔄 Can be upgraded by package updates
+- 📤 Can be distributed to other orgs
+
+### Examples of Unmanaged Layers:
+
+1. **Custom Fields**
+   - Fields you create directly in your org
+   - Example: "Telecommunications Device for the Deaf (TDD)" field
+
+2. **Custom Objects**
+   - Objects created in your org
+   - Not from AppExchange packages
+
+3. **Apex Classes/Triggers**
+   - Code written directly in your org
+   - Not from managed packages
+
+4. **Visualforce Pages/Lightning Components**
+   - UI components created in your org
+
+5. **Workflows/Process Builder/Flows**
+   - Automation created directly
+
+6. **Profiles/Permission Sets**
+   - Security settings in your org
+
+### Why It Matters:
+
+**In the Context of Your HSRG TDD Issue:**
+- If HSRG is a managed package, it may have its own fields
+- Your org might have unmanaged custom fields
+- Field conflicts can occur between managed and unmanaged layers
+- Unmanaged fields can override or conflict with managed package fields
+
+### Common Scenarios:
+
+**Scenario 1: Field Name Conflicts**
 ```
-Unmanaged Layer:
-- Custom data access code
-- Manual connection pooling
-- Direct database queries
-- Custom business logic
+Managed Package Field: "TDD" (from HSRG package)
+Unmanaged Field: "Telecommunications Device for the Deaf (TDD)" (your custom field)
+→ Portal might be pulling wrong field due to naming/API name conflicts
+```
 
-Managed Layer:
-- ORM (Object-Relational Mapping) framework
-- Dependency injection container
-- Framework-managed services
-- Auto-configured components
+**Scenario 2: Customization Layer**
+```
+Base Managed Package → Unmanaged Customizations Layer
+→ Your customizations sit "on top" of managed package
+→ Can extend but not modify managed components
 ```
 
 ---
 
-### 2. Cloud Services / Infrastructure
+## 2. Software Architecture: Unmanaged Layer
 
-#### Unmanaged Services
-- **Definition**: Infrastructure you fully control and manage
-- **You are responsible for**:
-  - Server provisioning and scaling
-  - Operating system updates
-  - Security patches
-  - Backup and recovery
-  - Monitoring and maintenance
+### Definition:
+In software architecture, an **unmanaged layer** refers to a layer of the application that is **not managed by a framework or container**.
 
-**Examples:**
-- Virtual Machines (VMs)
-- Unmanaged databases
-- Bare metal servers
-- Self-hosted applications
+### Characteristics:
+- **Manual Management**: You handle lifecycle, dependencies, and resources manually
+- **No Framework Control**: Not automatically managed by dependency injection, ORM, etc.
+- **Direct Access**: Direct database access, file system access, etc.
+- **Custom Logic**: Business logic not handled by framework
 
-#### Managed Services
-- **Definition**: Infrastructure managed by the cloud provider
-- **Provider handles**:
-  - Scaling
-  - Updates and patches
-  - Backups
-  - Monitoring
-  - High availability
+### Examples:
+- Direct SQL queries instead of ORM
+- Manual memory management
+- Custom service layers not using DI containers
+- Legacy code not integrated with modern frameworks
 
-**Examples:**
+---
+
+## 3. Cloud Infrastructure: Unmanaged Layer
+
+### Definition:
+Infrastructure components that you manage yourself rather than using managed services.
+
+### Managed vs Unmanaged:
+
+**Managed Services:**
 - AWS RDS (managed database)
-- Azure App Service (managed hosting)
+- AWS Lambda (managed compute)
+- Azure SQL Database
 - Google Cloud SQL
-- Serverless functions
+
+**Unmanaged Services:**
+- EC2 instances you configure yourself
+- Self-hosted databases
+- Custom infrastructure you maintain
+- Virtual machines you manage
 
 ---
 
-### 3. Data Architecture
+## 4. Data Architecture: Unmanaged Data Layer
 
-#### Unmanaged Data Layer
-- **Definition**: Data storage/access you manage directly
-- **Characteristics**:
-  - Direct database connections
-  - Manual query optimization
-  - Custom caching logic
-  - Manual data migration
-  - You handle transactions
+### Definition:
+A data layer where you manually handle data operations, transformations, and storage without using managed data services.
 
-**Example:**
-```sql
--- Unmanaged: Direct SQL queries
-SELECT * FROM users WHERE id = ?
--- You handle connection, error, transaction
-```
-
-#### Managed Data Layer
-- **Definition**: Data access managed by framework/ORM
-- **Characteristics**:
-  - ORM handles connections
-  - Automatic query optimization
-  - Built-in caching
-  - Migration tools
-  - Framework manages transactions
-
-**Example:**
-```python
-# Managed: ORM handles everything
-user = User.objects.get(id=123)
-# Framework handles connection, error, transaction
-```
+### Examples:
+- Custom ETL scripts
+- Manual data pipelines
+- Direct database connections
+- Custom data transformation logic
 
 ---
 
-### 4. API / Service Layers
+## How to Identify Unmanaged Layers in Your System
 
-#### Unmanaged API Layer
-- **Definition**: API endpoints you build and manage manually
-- **You handle**:
-  - Request routing
-  - Authentication/authorization
-  - Request validation
-  - Error handling
-  - Response formatting
-  - Rate limiting
+### For Salesforce:
+1. **Setup Menu Check**
+   - Go to Setup → Installed Packages
+   - See what's managed vs unmanaged
 
-**Example:**
-```javascript
-// Unmanaged: Manual API handling
-app.post('/api/users', (req, res) => {
-  // You write all validation, error handling, etc.
-  if (!req.body.email) {
-    return res.status(400).json({error: 'Email required'});
-  }
-  // ... manual processing
-});
+2. **Component Properties**
+   - Check component details
+   - Managed components show package namespace
+   - Unmanaged show no namespace
+
+3. **API Names**
+   - Managed: `namespace__FieldName__c`
+   - Unmanaged: `FieldName__c` (no namespace)
+
+### For Your HSRG TDD Issue:
+
+**Questions to Ask:**
+1. Is HSRG a managed package?
+2. Are the TDD fields managed or unmanaged?
+3. Is there a namespace prefix on the fields?
+4. Can you directly edit the fields in Setup?
+
+**Check Field API Names:**
 ```
-
-#### Managed API Layer
-- **Definition**: API framework handles common concerns
-- **Framework provides**:
-  - Automatic routing
-  - Built-in validation
-  - Standardized error handling
-  - Authentication middleware
-  - Auto-generated documentation
-
-**Example:**
-```python
-# Managed: Framework handles common concerns
-@api.route('/users', methods=['POST'])
-@validate_request(UserSchema)
-@require_auth
-def create_user(data):
-    # Framework handled validation, auth, errors
-    return User.create(data)
+Managed Field:    hsrg__TDD__c or hsrg__Telecommunications_Device__c
+Unmanaged Field:  Telecommunications_Device_for_the_Deaf_TDD__c
 ```
 
 ---
 
-## In Context of HSRG System
+## Best Practices
 
-If "unmanaged layer" was mentioned in your HSRG field mapping analysis, it likely refers to:
+### For Salesforce Unmanaged Layers:
 
-### Possible Meanings:
+1. **Naming Conventions**
+   - Use clear, descriptive names
+   - Avoid conflicts with managed packages
+   - Follow your org's naming standards
 
-1. **Unmanaged Data Access Layer**
-   - Direct database queries instead of ORM
-   - Manual field mapping
-   - Custom data transformation code
+2. **Documentation**
+   - Document all unmanaged customizations
+   - Track dependencies
+   - Maintain change logs
 
-2. **Unmanaged Service Layer**
-   - Custom API endpoints
-   - Manual request/response handling
-   - No framework-managed services
+3. **Version Control**
+   - Use version control for unmanaged code
+   - Track changes to unmanaged components
+   - Use change sets or deployment tools
 
-3. **Unmanaged Configuration**
-   - Hardcoded field mappings
-   - Manual configuration management
-   - Not using configuration framework
+4. **Testing**
+   - Test unmanaged customizations thoroughly
+   - Ensure they don't break managed package functionality
+   - Test upgrade scenarios
 
-### Why It Matters for TDD Field Issue:
+### For Software Architecture:
 
-If the TDD field mapping is in an "unmanaged layer":
-- ✅ **Pros**: Direct control, easier to find and change
-- ❌ **Cons**: Might be hardcoded, less flexible, harder to maintain
+1. **Minimize Unmanaged Layers**
+   - Use managed services when possible
+   - Leverage frameworks for common tasks
+   - Only use unmanaged for specific requirements
 
-**Investigation Focus:**
-- Look for direct database queries
-- Check for hardcoded field names
-- Find manual field mapping code
-- Look for custom data transformation logic
-
----
-
-## Key Differences Summary
-
-| Aspect | Unmanaged Layer | Managed Layer |
-|--------|----------------|---------------|
-| **Control** | Full control | Framework controls |
-| **Code** | More code to write | Less code needed |
-| **Flexibility** | High flexibility | Framework constraints |
-| **Maintenance** | You maintain everything | Framework handles some |
-| **Complexity** | More complex initially | Simpler to start |
-| **Customization** | Easy to customize | May be limited |
-| **Updates** | You handle updates | Framework may auto-update |
+2. **Isolation**
+   - Isolate unmanaged code
+   - Use interfaces/abstractions
+   - Document dependencies
 
 ---
 
-## When to Use Each
+## Troubleshooting Unmanaged Layer Issues
 
-### Use Unmanaged Layer When:
-- Need maximum control
-- Custom requirements not met by frameworks
-- Performance-critical code
-- Legacy system integration
-- Specific security requirements
+### Common Problems:
 
-### Use Managed Layer When:
-- Standard functionality needed
-- Faster development required
-- Team less familiar with low-level details
-- Want built-in best practices
-- Need automatic scaling/management
+1. **Field Conflicts**
+   - Solution: Check API names, namespaces
+   - Verify field sources (managed vs unmanaged)
 
----
+2. **Deployment Issues**
+   - Solution: Ensure unmanaged components are included in deployment
+   - Check dependencies
 
-## Common Patterns
+3. **Upgrade Conflicts**
+   - Solution: Test managed package upgrades
+   - Review unmanaged customizations for conflicts
 
-### Hybrid Approach (Most Common)
-Many systems use both:
-```
-┌─────────────────────┐
-│  Managed API Layer  │  ← Framework handles routing, auth
-├─────────────────────┤
-│ Unmanaged Business  │  ← Custom business logic
-│      Logic          │
-├─────────────────────┤
-│  Managed Data Layer │  ← ORM handles data access
-└─────────────────────┘
-```
-
----
-
-## Questions to Ask
-
-If someone mentions "unmanaged layer" in your context:
-
-1. **What layer are they referring to?**
-   - Data access?
-   - API/service?
-   - Infrastructure?
-   - Configuration?
-
-2. **Why is it unmanaged?**
-   - Legacy system?
-   - Custom requirements?
-   - Performance needs?
-   - Migration in progress?
-
-3. **What are the implications?**
-   - More manual work?
-   - Different maintenance approach?
-   - Different testing strategy?
-   - Different deployment process?
+4. **Performance Issues**
+   - Solution: Review unmanaged code efficiency
+   - Optimize custom queries/logic
 
 ---
 
 ## Related Terms
 
-- **Managed Service**: Cloud service managed by provider
-- **Unmanaged Service**: Service you manage yourself
-- **Bare Metal**: Unmanaged infrastructure
-- **Infrastructure as Code**: Managing infrastructure programmatically
-- **Container Orchestration**: Managing containers (Kubernetes, etc.)
-- **Serverless**: Fully managed compute (extreme managed)
+- **Managed Package**: Pre-built, packaged Salesforce application
+- **Unmanaged Package**: Collection of components you can edit
+- **Namespace**: Prefix identifying managed package components
+- **Metadata**: Configuration and code in Salesforce
+- **Customization Layer**: Your org-specific changes
 
 ---
 
-**Note**: The exact meaning depends on your specific system context. In the HSRG TDD field issue, it likely refers to a layer where field mappings are handled manually rather than through a configuration framework.
+## Summary
+
+**In Salesforce Context (Most Relevant):**
+- **Unmanaged Layer** = Components you create directly in your org
+- **Not part of a managed package**
+- **Fully editable and customizable**
+- **Org-specific**
+
+**For Your HSRG Issue:**
+- Check if TDD fields are managed or unmanaged
+- Verify field API names and namespaces
+- Ensure portal is referencing the correct field (managed vs unmanaged)
+- Check for field name conflicts between layers
+
+---
+
+**Quick Check:**
+1. Go to Setup → Object Manager → [Your Object]
+2. Check field properties
+3. Look for namespace prefix
+4. If no namespace = Unmanaged
+5. If has namespace = Managed
