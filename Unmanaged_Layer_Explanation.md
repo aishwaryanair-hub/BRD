@@ -1,169 +1,212 @@
 # Unmanaged Layer - Explanation
 
 ## Overview
-An "unmanaged layer" typically refers to a component or layer in a system that is not directly controlled, managed, or maintained by the core application or framework. The exact meaning depends on the context.
+An "unmanaged layer" refers to a layer in a system architecture that is not controlled, managed, or maintained by a central authority or automated system. The term can have different meanings depending on the context.
 
 ---
 
 ## Common Contexts
 
-### 1. Software Architecture / Application Layers
+### 1. Software Architecture Layers
 
-#### Unmanaged Layer Definition
-An **unmanaged layer** is a software component that:
-- Operates independently of the main application framework
-- Is not automatically managed by dependency injection or service containers
-- Requires manual lifecycle management (creation, initialization, disposal)
-- May not follow the standard application patterns or conventions
+In traditional layered architecture, an **unmanaged layer** typically means:
 
-#### Characteristics
-- **Manual Control**: You must explicitly create, configure, and manage instances
-- **No Framework Integration**: Not integrated with the application's dependency injection system
-- **Direct Instantiation**: Created using `new` keyword or factory methods rather than being injected
-- **Lifecycle Management**: You're responsible for initialization, cleanup, and resource management
-
-#### Example in Code
-```java
-// Managed Layer (Framework manages it)
-@Autowired
-private UserService userService; // Framework creates and injects
-
-// Unmanaged Layer (You manage it)
-UserService userService = new UserService(); // You create and manage
-```
-
----
-
-### 2. Salesforce - Unmanaged Packages
-
-In **Salesforce**, an unmanaged package is:
-- A collection of components that can be distributed
-- **Not version-controlled** by Salesforce
-- Can be edited directly in the target org after installation
-- Typically used for templates, examples, or starting points
-
-**Unmanaged vs Managed Packages:**
-- **Unmanaged**: Can be modified after installation, no upgrade path
-- **Managed**: Version-controlled, upgradeable, components are locked
-
----
-
-### 3. Infrastructure / Cloud Services
-
-#### Unmanaged Services
-Services where you have **full control** but also **full responsibility**:
-- **Unmanaged Kubernetes**: You manage the control plane, nodes, updates
-- **Unmanaged Databases**: You handle backups, scaling, patching
-- **Unmanaged Load Balancers**: You configure and maintain everything
-
-**vs Managed Services:**
-- **Managed**: Provider handles maintenance, scaling, backups
-- **Unmanaged**: You handle everything yourself
-
----
-
-### 4. Data Architecture Layers
-
-#### Unmanaged Data Layer
-A data access layer that:
-- Doesn't use an ORM (Object-Relational Mapping) framework
-- Uses raw SQL or direct database connections
-- Requires manual query writing and result mapping
-- No automatic connection pooling or transaction management
+**Characteristics:**
+- Not controlled by a framework or container
+- Manual lifecycle management
+- Direct instantiation and management
+- No automatic dependency injection
+- Manual resource cleanup
 
 **Example:**
 ```java
-// Managed Layer (ORM like Hibernate)
-User user = userRepository.findById(id); // Framework handles SQL
+// Unmanaged Layer - Manual instantiation
+public class DataAccessLayer {
+    private Connection connection;
+    
+    public DataAccessLayer() {
+        // Manual connection management
+        this.connection = DriverManager.getConnection(...);
+    }
+    
+    public void close() {
+        // Manual cleanup required
+        connection.close();
+    }
+}
+```
 
-// Unmanaged Layer (Raw JDBC)
-Connection conn = DriverManager.getConnection(url);
-Statement stmt = conn.createStatement();
-ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE id = " + id);
-// Manual mapping required
+**vs. Managed Layer:**
+```java
+// Managed Layer - Framework handles lifecycle
+@Service  // Spring framework manages this
+public class DataAccessLayer {
+    @Autowired
+    private Connection connection;  // Injected by framework
+    
+    // Framework handles cleanup automatically
+}
 ```
 
 ---
 
-### 5. API / Service Layers
+### 2. Salesforce - Unmanaged Packages/Layers
 
-#### Unmanaged API Layer
-An API layer that:
-- Doesn't use framework routing (like Spring, Express, etc.)
-- Manually handles HTTP requests/responses
-- No automatic serialization/deserialization
-- Manual error handling and status codes
+In Salesforce, **unmanaged layers** refer to:
+
+**Unmanaged Package:**
+- Metadata that can be modified directly
+- Not version-controlled by Salesforce
+- Can be edited in any org
+- Changes are not tracked as package versions
+- Typically used for development or one-time deployments
+
+**Managed Package:**
+- Metadata locked and version-controlled
+- Cannot be modified in subscriber orgs
+- Changes tracked through versions
+- Used for AppExchange apps
+
+**Unmanaged Layer in Salesforce:**
+- Customizations made directly in the org
+- Not part of a managed package
+- Can be modified by admins/developers
+- Not protected from changes
+
+---
+
+### 3. Data Architecture Layers
+
+In data architecture, **unmanaged layers** can mean:
+
+**Unmanaged Data Layer:**
+- Data not controlled by a data management system
+- No automated governance
+- Manual data quality processes
+- Direct database access without abstraction
+- No data lineage tracking
+
+**Managed Data Layer:**
+- Controlled by data management platform
+- Automated governance and quality checks
+- Data cataloging and lineage
+- Access through APIs/abstractions
+
+---
+
+### 4. Infrastructure/Cloud Layers
+
+**Unmanaged Infrastructure Layer:**
+- Servers, networks, storage managed manually
+- No automation or orchestration
+- Manual scaling and provisioning
+- Direct access to underlying resources
+
+**Managed Infrastructure Layer:**
+- Cloud provider manages resources
+- Automated scaling and provisioning
+- Managed services (e.g., AWS RDS, Azure SQL)
+- Limited direct access
+
+---
+
+## Key Characteristics of Unmanaged Layers
+
+### Advantages
+✅ **Full Control**
+- Complete control over implementation
+- No framework limitations
+- Custom behavior possible
+
+✅ **Flexibility**
+- Can be modified directly
+- No restrictions from management layer
+- Direct access to resources
+
+✅ **Simplicity (sometimes)**
+- No framework overhead
+- Direct implementation
+- Easier to understand for simple cases
+
+### Disadvantages
+❌ **Manual Management**
+- Must handle lifecycle manually
+- Resource cleanup is your responsibility
+- More boilerplate code
+
+❌ **No Automation**
+- No automatic dependency injection
+- Manual configuration
+- No built-in features
+
+❌ **Maintenance Burden**
+- More code to maintain
+- Error-prone manual processes
+- Less standardized
 
 ---
 
 ## In Context of Your HSRG System
 
-If you're referring to an **unmanaged layer** in your HSRG portal system, it likely means:
+If you're dealing with an "unmanaged layer" in your HSRG system, it likely means:
 
-### Possible Interpretations:
+### Possible Scenarios:
 
 1. **Unmanaged Data Access Layer**
-   - Direct database queries without ORM
-   - Manual field mapping
-   - Raw SQL execution
-   - This could explain why field mappings might be hardcoded
+   - Direct database connections
+   - Manual query execution
+   - No ORM or data access framework
+   - Manual transaction management
 
-2. **Unmanaged Service Layer**
-   - Services not using dependency injection
-   - Manual instantiation and configuration
-   - Could make field mapping changes more complex
+2. **Unmanaged Configuration Layer**
+   - Configuration not in a managed config system
+   - Hardcoded values
+   - Manual configuration updates
+   - No centralized configuration management
 
-3. **Unmanaged Configuration Layer**
-   - Configuration not managed by framework
-   - Hardcoded values instead of config files
-   - Could be why field names are hardcoded
+3. **Unmanaged Field Mapping Layer**
+   - Field mappings hardcoded in code
+   - Not in a configuration file or database
+   - Manual updates required for field changes
+   - No dynamic field mapping system
 
----
+### For Your TDD Field Issue:
 
-## Why Unmanaged Layers Exist
-
-### Advantages:
-- ✅ **Full Control**: Complete control over behavior
-- ✅ **Performance**: Can be optimized for specific use cases
-- ✅ **Flexibility**: Not constrained by framework limitations
-- ✅ **Simplicity**: No framework overhead for simple cases
-
-### Disadvantages:
-- ❌ **More Code**: More boilerplate and manual work
-- ❌ **Maintenance**: Harder to maintain and update
-- ❌ **Testing**: More difficult to test and mock
-- ❌ **Consistency**: May not follow application patterns
-- ❌ **Lifecycle**: Manual resource management required
+If the field mapping is in an "unmanaged layer," it might mean:
+- Field reference is hardcoded in code (not configurable)
+- No configuration system managing field mappings
+- Changes require code modifications (not just config updates)
+- No centralized field mapping management
 
 ---
 
-## Identifying Unmanaged Layers
+## How to Identify Unmanaged Layers
 
 ### Signs of Unmanaged Layer:
-- Direct instantiation (`new ClassName()`)
-- Manual resource management (connections, files, etc.)
-- No dependency injection
-- Hardcoded configuration
-- Raw API/database access
-- Manual error handling
-- No framework annotations or decorators
+- [ ] Direct instantiation (no dependency injection)
+- [ ] Manual resource management (connections, files, etc.)
+- [ ] Hardcoded values instead of configuration
+- [ ] No framework annotations or decorators
+- [ ] Manual lifecycle management
+- [ ] Direct database/storage access
+- [ ] No automated testing framework integration
 
-### Example Detection:
+### Code Indicators:
 ```java
-// This is likely unmanaged:
-public class DataService {
-    public void getData() {
-        Connection conn = new Connection(); // Manual creation
-        // Manual management
-    }
-}
+// Unmanaged - Manual instantiation
+MyService service = new MyService();
 
-// This is likely managed:
-@Service
-public class DataService {
-    @Autowired
-    private DataRepository repository; // Framework managed
-}
+// Managed - Framework injection
+@Autowired
+MyService service;
+```
+
+```java
+// Unmanaged - Hardcoded
+String fieldName = "(DNU) Telecommunications Device for the Deaf (TDD)";
+
+// Managed - From configuration
+String fieldName = config.getFieldMapping("TDD");
 ```
 
 ---
@@ -171,62 +214,75 @@ public class DataService {
 ## Converting Unmanaged to Managed
 
 ### Steps:
-1. **Identify Dependencies**: What does the layer depend on?
-2. **Create Interfaces**: Define contracts for the layer
-3. **Register with Framework**: Add to dependency injection container
-4. **Refactor Instantiation**: Replace `new` with injection
-5. **Update Configuration**: Move hardcoded values to config
-6. **Add Lifecycle Management**: Let framework handle creation/destruction
+1. **Identify the Layer**
+   - What needs to be managed?
+   - What are the pain points?
+
+2. **Choose Management Approach**
+   - Framework (Spring, .NET Core, etc.)
+   - Configuration system
+   - Service container
+   - Cloud managed services
+
+3. **Refactor Gradually**
+   - Start with new code
+   - Migrate critical paths
+   - Maintain backward compatibility
+
+4. **Benefits to Gain**
+   - Automatic lifecycle management
+   - Configuration-driven behavior
+   - Easier testing
+   - Better maintainability
 
 ---
 
 ## Best Practices
 
 ### When to Use Unmanaged:
-- Simple utilities with no dependencies
-- Legacy code integration
-- Performance-critical sections
-- Third-party libraries that can't be managed
+- Simple, standalone components
+- Performance-critical code
+- Legacy system integration
+- When framework overhead is unacceptable
 
 ### When to Use Managed:
-- Business logic components
-- Data access layers
-- Service layers
-- Components with dependencies
-- Most application code
+- Complex applications
+- Need for dependency injection
+- Configuration-driven behavior
+- Team development (standardization)
+- Testing requirements
 
 ---
 
 ## Related Terms
 
-- **Managed Layer**: Framework-controlled, dependency-injected components
-- **Managed Service**: Cloud service managed by provider
-- **Managed Package**: Version-controlled, upgradeable package
-- **Dependency Injection**: Framework manages object creation and wiring
-- **Service Container**: Container that manages object lifecycles
+- **Managed Layer**: Framework-controlled, automated lifecycle
+- **Managed Service**: Cloud provider manages infrastructure
+- **Unmanaged Package**: Editable metadata (Salesforce)
+- **Managed Package**: Locked, versioned metadata (Salesforce)
+- **Dependency Injection**: Framework manages dependencies
+- **IoC Container**: Inversion of Control container
 
 ---
 
-## Questions to Clarify Context
+## Summary
 
-If you're working on the HSRG TDD field issue and encounter "unmanaged layer":
+**Unmanaged Layer** = Layer you control and manage manually
+- No framework automation
+- Direct implementation
+- Manual lifecycle management
+- Full control but more responsibility
 
-1. **What type of system?**
-   - Is it a web application?
-   - Is it Salesforce?
-   - Is it cloud infrastructure?
-
-2. **What layer specifically?**
-   - Data access layer?
-   - Service layer?
-   - API layer?
-   - Configuration layer?
-
-3. **What's the impact?**
-   - Does it affect field mapping?
-   - Does it make changes harder?
-   - Is it causing the current issue?
+**Managed Layer** = Layer controlled by framework/system
+- Automated lifecycle
+- Dependency injection
+- Configuration-driven
+- Less control but less maintenance
 
 ---
 
-**Note**: The exact meaning depends on your specific system architecture. If you can share more context about where you encountered "unmanaged layer" in your HSRG system, I can provide more specific guidance.
+**For your HSRG TDD field issue:** If the field mapping is in an unmanaged layer, you'll likely need to:
+1. Find the hardcoded field reference
+2. Change it directly in code
+3. Deploy the code change
+4. (Consider moving to managed config for future flexibility)
