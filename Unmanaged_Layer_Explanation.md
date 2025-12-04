@@ -1,273 +1,308 @@
-# What are Unmanaged Layers?
+# Unmanaged Layer - Explanation
 
 ## Overview
-An "unmanaged layer" refers to a layer in a software system that is **not managed by a framework, container, or dependency injection system**. It's code that developers write and control directly, without automatic lifecycle management.
+An "unmanaged layer" typically refers to a layer in a system architecture that is not directly controlled, managed, or maintained by the primary system or framework. The exact meaning depends on the context.
 
 ---
 
 ## Common Contexts
 
-### 1. **Software Architecture Layers**
+### 1. Software Architecture Layers
 
-In layered architecture (Presentation → Business → Data), an unmanaged layer means:
+In **layered architecture**, an unmanaged layer is one that:
+- Operates independently of the main application framework
+- Is not automatically managed by dependency injection or service containers
+- Requires manual instantiation and lifecycle management
+- May not follow the same patterns as managed layers
 
-**Unmanaged Layer:**
-- Code you write directly
-- No framework managing object lifecycle
-- Manual instantiation and management
-- Full control over implementation
-- Example: Plain Java classes, simple functions
-
-**Managed Layer (opposite):**
-- Framework manages object creation/lifecycle
-- Dependency injection handles dependencies
-- Automatic configuration
-- Example: Spring beans, .NET services, Angular services
-
+**Example:**
 ```
-┌─────────────────────────────────┐
-│  Presentation Layer (Managed)   │ ← Framework manages (Spring, Angular)
-├─────────────────────────────────┤
-│  Business Logic (Unmanaged)    │ ← You write directly, no framework
-├─────────────────────────────────┤
-│  Data Access (Managed)          │ ← ORM/Data framework manages
-└─────────────────────────────────┘
+Managed Layers (Framework-controlled):
+- Controllers (auto-instantiated by framework)
+- Services (dependency injection)
+- Repositories (managed by ORM)
+
+Unmanaged Layers (Manual control):
+- Utility classes (manual instantiation)
+- Third-party integrations (direct API calls)
+- Legacy code components
+- External service wrappers
 ```
 
 ---
 
-### 2. **Cloud Computing (AWS/Azure)**
+### 2. Cloud/Infrastructure Layers
 
-**Unmanaged Services:**
-- You manage the infrastructure
-- You handle scaling, patching, backups
-- More control, more responsibility
-- Example: EC2 instances, self-hosted databases
+In **cloud architecture**, unmanaged layers refer to:
+- Infrastructure components you configure and manage yourself
+- Services where you handle scaling, patching, and maintenance
+- As opposed to "managed services" (cloud provider handles operations)
 
-**Managed Services:**
-- Cloud provider manages infrastructure
-- Automatic scaling, patching, backups
-- Less control, less maintenance
-- Example: AWS Lambda, RDS, Azure Functions
-
----
-
-### 3. **Data Architecture**
-
-**Unmanaged Data Layer:**
-- Direct database access
-- Manual SQL queries
-- No ORM (Object-Relational Mapping)
-- You handle connections, transactions
-- Example: JDBC, ADO.NET
-
-**Managed Data Layer:**
-- ORM framework manages
-- Entity Framework, Hibernate, Sequelize
-- Automatic query generation
-- Connection pooling handled
-- Example: Entity Framework, Hibernate
-
----
-
-### 4. **Dependency Injection Context**
-
-**Unmanaged:**
-```java
-// Unmanaged - you create it yourself
-MyService service = new MyService();
-service.doSomething();
+**Managed vs Unmanaged:**
 ```
+Managed Layer:
+- AWS RDS (database managed by AWS)
+- Azure App Service (platform managed)
+- Google Cloud SQL (database managed)
 
-**Managed:**
-```java
-// Managed - framework creates and injects
-@Autowired
-MyService service;  // Spring creates this
+Unmanaged Layer:
+- EC2 instances (you manage OS, updates)
+- Self-hosted databases
+- Custom infrastructure you configure
 ```
 
 ---
 
-## Key Characteristics
+### 3. Data Architecture Layers
 
-### Unmanaged Layer
-✅ **Pros:**
-- Full control over implementation
-- No framework overhead
-- Simple, direct code
-- Easy to understand
-- No dependency on framework
+In **data architecture**, unmanaged layers can refer to:
+- Data layers not controlled by a data management framework
+- Raw data sources without governance
+- Data that bypasses standard ETL processes
 
-❌ **Cons:**
-- Manual lifecycle management
-- More boilerplate code
-- Harder to test (no mocking framework)
-- No automatic dependency resolution
-- More code to maintain
+**Example:**
+```
+Managed Data Layer:
+- Data warehouse (governed, structured)
+- ETL pipelines (monitored, versioned)
+- Data catalogs (documented)
 
-### Managed Layer
-✅ **Pros:**
-- Automatic lifecycle management
-- Dependency injection
-- Easier testing with mocks
-- Less boilerplate
-- Framework handles complexity
+Unmanaged Data Layer:
+- Shadow IT data sources
+- Unmonitored data streams
+- Direct database access bypassing governance
+- Spreadsheet data not in system
+```
 
-❌ **Cons:**
-- Framework dependency
-- Learning curve
-- Less control
-- Potential performance overhead
-- Framework-specific code
+---
+
+### 4. Application Architecture (Presentation/Business/Data)
+
+In **traditional layered architecture**:
+
+**Managed Layers:**
+- Framework-managed components
+- Dependency injection containers
+- Service locators
+- Auto-configured components
+
+**Unmanaged Layers:**
+- Static utility classes
+- Direct database connections (not using ORM)
+- File system operations
+- External API clients without framework integration
+- Legacy code that doesn't follow current patterns
+
+---
+
+## Characteristics of Unmanaged Layers
+
+### Typical Traits:
+1. **Manual Lifecycle Management**
+   - You create, configure, and dispose of objects manually
+   - No automatic dependency resolution
+
+2. **Direct Instantiation**
+   ```java
+   // Unmanaged - manual creation
+   MyUtility util = new MyUtility();
+   
+   // Managed - framework handles it
+   @Autowired
+   MyService service; // Framework creates and injects
+   ```
+
+3. **Limited Framework Integration**
+   - May not participate in framework features
+   - No automatic transaction management
+   - No automatic logging/monitoring hooks
+
+4. **Independent Operation**
+   - Can function outside the main application context
+   - May not follow framework conventions
+
+---
+
+## Why Unmanaged Layers Exist
+
+### Common Reasons:
+1. **Legacy Code**
+   - Older code that predates current framework
+   - Too expensive to refactor
+
+2. **Third-Party Integration**
+   - External libraries not designed for your framework
+   - Direct API calls to external services
+
+3. **Performance Requirements**
+   - Need direct control for optimization
+   - Framework overhead not acceptable
+
+4. **Specialized Needs**
+   - Components that don't fit framework patterns
+   - Utility classes that are stateless
+
+5. **Migration in Progress**
+   - Code being gradually moved to managed approach
+   - Temporary unmanaged state during transition
 
 ---
 
 ## Examples by Technology
 
-### Java/Spring
+### Java/Spring Framework
 ```java
-// UNMANAGED - Plain Java class
-public class UserService {
-    private UserRepository repo = new UserRepository();
-    // You manage everything
-}
-
-// MANAGED - Spring Bean
+// Managed Layer (Spring-managed)
 @Service
 public class UserService {
     @Autowired
-    private UserRepository repo;
-    // Spring manages lifecycle
+    private UserRepository repository; // Managed
+}
+
+// Unmanaged Layer
+public class FileUtility {
+    // Manual instantiation, no Spring annotations
+    public static void processFile() { ... }
 }
 ```
 
 ### .NET
 ```csharp
-// UNMANAGED
+// Managed Layer (Dependency Injection)
 public class UserService {
-    private UserRepository repo = new UserRepository();
+    private IUserRepository _repository;
+    public UserService(IUserRepository repository) { ... } // DI managed
 }
 
-// MANAGED
-public class UserService {
-    private readonly UserRepository _repo;
-    public UserService(UserRepository repo) {
-        _repo = repo; // Dependency injection
-    }
+// Unmanaged Layer
+public static class FileHelper {
+    // Static utility, not in DI container
+    public static void ProcessFile() { ... }
 }
 ```
 
-### JavaScript/Node.js
+### Node.js
 ```javascript
-// UNMANAGED
-const userService = {
-    repo: new UserRepository(),
-    // Direct instantiation
-};
+// Managed Layer (Framework-managed)
+app.get('/users', (req, res) => {
+    // Express manages request/response
+});
 
-// MANAGED (with framework like NestJS)
-@Injectable()
-export class UserService {
-    constructor(private repo: UserRepository) {}
-    // Framework manages
-}
+// Unmanaged Layer
+const fs = require('fs'); // Direct Node.js API, not framework-managed
+fs.readFileSync('data.txt');
 ```
 
 ---
 
-## When to Use Unmanaged Layers
+## Implications
 
-### Use Unmanaged When:
-- ✅ Simple applications
-- ✅ Performance-critical code
-- ✅ No need for dependency injection
-- ✅ Minimal dependencies
-- ✅ Learning/understanding the basics
-- ✅ Legacy systems
+### Challenges with Unmanaged Layers:
+1. **Testing Difficulty**
+   - Harder to mock or replace
+   - May require more setup
 
-### Use Managed When:
-- ✅ Complex applications
-- ✅ Need dependency injection
-- ✅ Testing is important
-- ✅ Team collaboration
-- ✅ Enterprise applications
-- ✅ Microservices architecture
+2. **Dependency Management**
+   - Manual dependency tracking
+   - Risk of circular dependencies
 
----
+3. **Lifecycle Issues**
+   - Memory leaks if not properly disposed
+   - Resource management complexity
 
-## In Your HSRG Context
+4. **Integration Problems**
+   - May not participate in framework features
+   - Transaction boundaries unclear
+   - Logging/monitoring gaps
 
-For the HSRG TDD field issue, you might encounter:
+### Benefits:
+1. **Flexibility**
+   - Full control over implementation
+   - No framework constraints
 
-**Unmanaged Layer Example:**
-```java
-// Direct database access - unmanaged
-Connection conn = DriverManager.getConnection(url);
-Statement stmt = conn.createStatement();
-ResultSet rs = stmt.executeQuery("SELECT * FROM hsrg WHERE...");
-// You manage connection, transactions, etc.
-```
+2. **Performance**
+   - No framework overhead
+   - Direct access when needed
 
-**Managed Layer Example:**
-```java
-// ORM framework - managed
-@Repository
-public class HSRGRepository {
-    @Query("SELECT h FROM HSRG h WHERE...")
-    List<HSRG> findByServiceType(String type);
-    // Framework manages connection, transactions
-}
-```
+3. **Simplicity**
+   - For simple utilities, may be simpler
+   - Less configuration needed
 
 ---
 
-## Hybrid Approach
+## Best Practices
 
-Many systems use both:
+### When to Use Unmanaged Layers:
+✅ **Appropriate for:**
+- Simple utility classes
+- Stateless helper functions
+- Third-party integrations
+- Performance-critical code
+- Legacy code migration
 
-```
-┌─────────────────────────────┐
-│  Managed Layer              │ ← Framework handles
-│  (Controllers, Services)    │
-├─────────────────────────────┤
-│  Unmanaged Layer            │ ← Custom business logic
-│  (Utilities, Helpers)       │
-├─────────────────────────────┤
-│  Managed Layer              │ ← ORM handles
-│  (Data Access)              │
-└─────────────────────────────┘
-```
+❌ **Avoid for:**
+- Business logic
+- Data access (prefer managed repositories)
+- Services with dependencies
+- Components needing framework features
+
+### Migration Strategy:
+1. **Identify** unmanaged layers
+2. **Assess** if they should be managed
+3. **Refactor** gradually to managed approach
+4. **Document** why some remain unmanaged
+
+---
+
+## In Context of HSRG System
+
+If referring to your HSRG system, an "unmanaged layer" might mean:
+
+1. **Data Layer**
+   - Direct database access not going through standard data access layer
+   - Field mappings not in managed configuration
+
+2. **Service Layer**
+   - Components not in dependency injection container
+   - Direct instantiation instead of framework management
+
+3. **Integration Layer**
+   - External service calls not using managed clients
+   - Direct API calls bypassing service layer
+
+**For your TDD field issue:**
+- If field mapping is in an "unmanaged layer," it might be:
+  - Hardcoded in a utility class
+  - In a configuration file not managed by the framework
+  - In legacy code not following current patterns
+
+---
+
+## Questions to Clarify Context
+
+To provide more specific guidance, please clarify:
+1. **What system/technology** are you referring to?
+2. **What type of layer** (data, service, presentation, infrastructure)?
+3. **What framework** (Spring, .NET, Node.js, etc.)?
+4. **What's the specific issue** you're encountering?
 
 ---
 
 ## Summary
 
-**Unmanaged Layer = Code You Control Directly**
-- No framework managing it
-- You create, configure, and manage objects
-- More control, more responsibility
-- Simpler but more manual work
+**Unmanaged Layer = Layer not controlled by framework/system**
+- Manual lifecycle management
+- Direct instantiation
+- Limited framework integration
+- Independent operation
 
-**Managed Layer = Framework Controls It**
-- Framework creates and manages objects
-- Automatic dependency injection
-- Less control, less manual work
-- More complex but easier to maintain
+**Common in:**
+- Legacy code
+- Utilities
+- Third-party integrations
+- Performance-critical components
 
----
-
-## Quick Reference
-
-| Aspect | Unmanaged | Managed |
-|--------|-----------|---------|
-| Object Creation | Manual (`new`) | Framework |
-| Lifecycle | You manage | Framework manages |
-| Dependencies | Manual wiring | Auto-injection |
-| Testing | Harder | Easier (mocking) |
-| Control | Full | Limited |
-| Complexity | Lower | Higher |
-| Maintenance | More code | Less code |
-
----
-
-**In your analysis:** When investigating the HSRG TDD field issue, check if the field mapping is in a managed layer (framework configuration) or unmanaged layer (hardcoded in your code). This will determine how you fix it!
+**Consider:**
+- Whether it should remain unmanaged
+- Migration to managed approach
+- Impact on testing and maintenance
