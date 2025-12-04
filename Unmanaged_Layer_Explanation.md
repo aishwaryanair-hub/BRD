@@ -1,308 +1,240 @@
-# Unmanaged Layer - Explanation
+# What Are Unmanaged Layers?
 
 ## Overview
-An "unmanaged layer" typically refers to a layer in a system architecture that is not directly controlled, managed, or maintained by the primary system or framework. The exact meaning depends on the context.
+"Unmanaged layer" can refer to different concepts depending on the context. Here are the most common interpretations:
 
 ---
 
-## Common Contexts
+## 1. Software Architecture - Layered Architecture
 
-### 1. Software Architecture Layers
+### Definition
+In **layered architecture**, an **unmanaged layer** typically refers to a layer that:
+- Is not directly controlled or managed by a framework
+- Requires manual handling of dependencies, lifecycle, and resources
+- Doesn't have automatic dependency injection or management
+- You must manually instantiate, configure, and dispose of components
 
-In **layered architecture**, an unmanaged layer is one that:
-- Operates independently of the main application framework
-- Is not automatically managed by dependency injection or service containers
-- Requires manual instantiation and lifecycle management
-- May not follow the same patterns as managed layers
+### Managed vs. Unmanaged Layers
 
-**Example:**
-```
-Managed Layers (Framework-controlled):
-- Controllers (auto-instantiated by framework)
-- Services (dependency injection)
-- Repositories (managed by ORM)
+**Managed Layer:**
+- Framework handles lifecycle (creation, initialization, disposal)
+- Automatic dependency injection
+- Configuration-driven
+- Example: Spring Framework managed beans, .NET dependency injection
 
-Unmanaged Layers (Manual control):
-- Utility classes (manual instantiation)
-- Third-party integrations (direct API calls)
-- Legacy code components
-- External service wrappers
-```
+**Unmanaged Layer:**
+- Manual lifecycle management
+- You create and manage objects yourself
+- Direct instantiation (using `new` keyword)
+- Manual resource cleanup
+- Example: Plain Java classes, direct database connections
 
----
+### Example in Code
 
-### 2. Cloud/Infrastructure Layers
-
-In **cloud architecture**, unmanaged layers refer to:
-- Infrastructure components you configure and manage yourself
-- Services where you handle scaling, patching, and maintenance
-- As opposed to "managed services" (cloud provider handles operations)
-
-**Managed vs Unmanaged:**
-```
-Managed Layer:
-- AWS RDS (database managed by AWS)
-- Azure App Service (platform managed)
-- Google Cloud SQL (database managed)
-
-Unmanaged Layer:
-- EC2 instances (you manage OS, updates)
-- Self-hosted databases
-- Custom infrastructure you configure
-```
-
----
-
-### 3. Data Architecture Layers
-
-In **data architecture**, unmanaged layers can refer to:
-- Data layers not controlled by a data management framework
-- Raw data sources without governance
-- Data that bypasses standard ETL processes
-
-**Example:**
-```
-Managed Data Layer:
-- Data warehouse (governed, structured)
-- ETL pipelines (monitored, versioned)
-- Data catalogs (documented)
-
-Unmanaged Data Layer:
-- Shadow IT data sources
-- Unmonitored data streams
-- Direct database access bypassing governance
-- Spreadsheet data not in system
-```
-
----
-
-### 4. Application Architecture (Presentation/Business/Data)
-
-In **traditional layered architecture**:
-
-**Managed Layers:**
-- Framework-managed components
-- Dependency injection containers
-- Service locators
-- Auto-configured components
-
-**Unmanaged Layers:**
-- Static utility classes
-- Direct database connections (not using ORM)
-- File system operations
-- External API clients without framework integration
-- Legacy code that doesn't follow current patterns
-
----
-
-## Characteristics of Unmanaged Layers
-
-### Typical Traits:
-1. **Manual Lifecycle Management**
-   - You create, configure, and dispose of objects manually
-   - No automatic dependency resolution
-
-2. **Direct Instantiation**
-   ```java
-   // Unmanaged - manual creation
-   MyUtility util = new MyUtility();
-   
-   // Managed - framework handles it
-   @Autowired
-   MyService service; // Framework creates and injects
-   ```
-
-3. **Limited Framework Integration**
-   - May not participate in framework features
-   - No automatic transaction management
-   - No automatic logging/monitoring hooks
-
-4. **Independent Operation**
-   - Can function outside the main application context
-   - May not follow framework conventions
-
----
-
-## Why Unmanaged Layers Exist
-
-### Common Reasons:
-1. **Legacy Code**
-   - Older code that predates current framework
-   - Too expensive to refactor
-
-2. **Third-Party Integration**
-   - External libraries not designed for your framework
-   - Direct API calls to external services
-
-3. **Performance Requirements**
-   - Need direct control for optimization
-   - Framework overhead not acceptable
-
-4. **Specialized Needs**
-   - Components that don't fit framework patterns
-   - Utility classes that are stateless
-
-5. **Migration in Progress**
-   - Code being gradually moved to managed approach
-   - Temporary unmanaged state during transition
-
----
-
-## Examples by Technology
-
-### Java/Spring Framework
 ```java
-// Managed Layer (Spring-managed)
+// MANAGED LAYER (Framework manages it)
 @Service
 public class UserService {
     @Autowired
-    private UserRepository repository; // Managed
+    private UserRepository repository; // Framework injects this
+    // Framework handles creation and lifecycle
 }
 
-// Unmanaged Layer
-public class FileUtility {
-    // Manual instantiation, no Spring annotations
-    public static void processFile() { ... }
-}
-```
-
-### .NET
-```csharp
-// Managed Layer (Dependency Injection)
+// UNMANAGED LAYER (You manage it)
 public class UserService {
-    private IUserRepository _repository;
-    public UserService(IUserRepository repository) { ... } // DI managed
+    private UserRepository repository;
+    
+    public UserService() {
+        // You manually create dependencies
+        this.repository = new UserRepository();
+    }
+    // You must manage lifecycle yourself
 }
-
-// Unmanaged Layer
-public static class FileHelper {
-    // Static utility, not in DI container
-    public static void ProcessFile() { ... }
-}
-```
-
-### Node.js
-```javascript
-// Managed Layer (Framework-managed)
-app.get('/users', (req, res) => {
-    // Express manages request/response
-});
-
-// Unmanaged Layer
-const fs = require('fs'); // Direct Node.js API, not framework-managed
-fs.readFileSync('data.txt');
 ```
 
 ---
 
-## Implications
+## 2. Salesforce - Unmanaged Packages/Layers
 
-### Challenges with Unmanaged Layers:
-1. **Testing Difficulty**
-   - Harder to mock or replace
-   - May require more setup
+### Definition
+In **Salesforce**, "unmanaged" refers to components that:
+- Are not packaged or version-controlled in a managed package
+- Can be directly edited in the org
+- Are not locked or protected
+- Can be modified by any user with appropriate permissions
 
-2. **Dependency Management**
-   - Manual dependency tracking
-   - Risk of circular dependencies
+### Managed vs. Unmanaged in Salesforce
 
-3. **Lifecycle Issues**
-   - Memory leaks if not properly disposed
-   - Resource management complexity
+**Managed Package:**
+- Locked components (can't be edited)
+- Version-controlled
+- Installed as a package
+- Protected from modification
 
-4. **Integration Problems**
-   - May not participate in framework features
-   - Transaction boundaries unclear
-   - Logging/monitoring gaps
+**Unmanaged:**
+- Editable components
+- Custom code, objects, fields created directly in org
+- Can be modified freely
+- Not packaged
 
-### Benefits:
-1. **Flexibility**
-   - Full control over implementation
-   - No framework constraints
+### Example
+- **Managed**: Installed AppExchange package (locked components)
+- **Unmanaged**: Custom objects/fields you create directly in your org
 
-2. **Performance**
-   - No framework overhead
-   - Direct access when needed
+---
 
-3. **Simplicity**
-   - For simple utilities, may be simpler
-   - Less configuration needed
+## 3. Data Architecture - Data Layers
+
+### Definition
+In **data architecture**, an unmanaged layer might refer to:
+- Raw data that isn't processed or transformed
+- Data that doesn't follow a schema or governance
+- Data sources not integrated into a data management system
+
+### Managed vs. Unmanaged Data
+
+**Managed Data Layer:**
+- Structured, validated, governed
+- Follows schema and standards
+- Integrated into data pipeline
+- Has metadata and documentation
+
+**Unmanaged Data Layer:**
+- Raw, unstructured, or semi-structured
+- No validation or governance
+- Not integrated into standard processes
+- May be temporary or ad-hoc
+
+---
+
+## 4. Network/Infrastructure Layers
+
+### Definition
+In **network or infrastructure** contexts:
+- Layers not controlled by orchestration tools
+- Manual configuration required
+- Not part of Infrastructure as Code (IaC)
+
+### Managed vs. Unmanaged Infrastructure
+
+**Managed:**
+- Cloud-managed services (AWS RDS, Azure SQL)
+- Infrastructure as Code (Terraform, CloudFormation)
+- Auto-scaling, automated backups
+
+**Unmanaged:**
+- Self-hosted servers
+- Manual configuration
+- You handle updates, backups, scaling
+
+---
+
+## 5. Application Layers - Common Architecture
+
+### Typical Layered Architecture
+
+```
+┌─────────────────────────────────┐
+│   Presentation Layer            │  ← User Interface
+│   (UI, Controllers, Views)      │
+├─────────────────────────────────┤
+│   Business Logic Layer          │  ← Business Rules
+│   (Services, Domain Logic)      │
+├─────────────────────────────────┤
+│   Data Access Layer             │  ← Database Access
+│   (Repositories, DAOs)          │
+├─────────────────────────────────┤
+│   Database Layer                │  ← Data Storage
+│   (Tables, Views, Stored Procs) │
+└─────────────────────────────────┘
+```
+
+### Unmanaged Layer Characteristics
+- **No Framework Control**: Layer operates independently
+- **Manual Management**: You handle creation, configuration, lifecycle
+- **Direct Dependencies**: No dependency injection
+- **Explicit Resource Management**: Manual cleanup required
+
+---
+
+## Common Use Cases
+
+### When You Might Encounter "Unmanaged Layer"
+
+1. **Legacy Code Integration**
+   - Integrating old code that doesn't use modern frameworks
+   - Wrapping unmanaged components in managed layers
+
+2. **Performance-Critical Sections**
+   - Direct database access for performance
+   - Bypassing framework overhead
+
+3. **Third-Party Integrations**
+   - External libraries that aren't framework-aware
+   - APIs that require manual connection management
+
+4. **Migration Scenarios**
+   - Moving from unmanaged to managed architecture
+   - Gradual refactoring of layers
 
 ---
 
 ## Best Practices
 
-### When to Use Unmanaged Layers:
-✅ **Appropriate for:**
-- Simple utility classes
-- Stateless helper functions
-- Third-party integrations
-- Performance-critical code
-- Legacy code migration
+### Working with Unmanaged Layers
 
-❌ **Avoid for:**
-- Business logic
-- Data access (prefer managed repositories)
-- Services with dependencies
-- Components needing framework features
+1. **Isolation**
+   - Keep unmanaged code isolated
+   - Use adapters/wrappers to integrate with managed layers
 
-### Migration Strategy:
-1. **Identify** unmanaged layers
-2. **Assess** if they should be managed
-3. **Refactor** gradually to managed approach
-4. **Document** why some remain unmanaged
+2. **Documentation**
+   - Clearly document what's unmanaged and why
+   - Note lifecycle and resource management requirements
 
----
+3. **Resource Management**
+   - Always clean up resources (connections, files, memory)
+   - Use try-finally or using statements
 
-## In Context of HSRG System
+4. **Testing**
+   - Test unmanaged layers thoroughly
+   - Mock dependencies when possible
 
-If referring to your HSRG system, an "unmanaged layer" might mean:
-
-1. **Data Layer**
-   - Direct database access not going through standard data access layer
-   - Field mappings not in managed configuration
-
-2. **Service Layer**
-   - Components not in dependency injection container
-   - Direct instantiation instead of framework management
-
-3. **Integration Layer**
-   - External service calls not using managed clients
-   - Direct API calls bypassing service layer
-
-**For your TDD field issue:**
-- If field mapping is in an "unmanaged layer," it might be:
-  - Hardcoded in a utility class
-  - In a configuration file not managed by the framework
-  - In legacy code not following current patterns
+5. **Migration Path**
+   - Plan to move to managed layers when possible
+   - Document technical debt
 
 ---
 
-## Questions to Clarify Context
+## In Context of Your HSRG System
 
-To provide more specific guidance, please clarify:
-1. **What system/technology** are you referring to?
-2. **What type of layer** (data, service, presentation, infrastructure)?
-3. **What framework** (Spring, .NET, Node.js, etc.)?
-4. **What's the specific issue** you're encountering?
+If you're asking about unmanaged layers in relation to your HSRG TDD field issue, it might refer to:
+
+1. **Data Layer**: Raw database fields not managed by an ORM
+2. **API Layer**: Direct database queries vs. managed service layer
+3. **Configuration Layer**: Hardcoded values vs. managed configuration
+
+### Questions to Clarify Context:
+- Are you working with a specific framework (Spring, .NET, Salesforce)?
+- Is this about data architecture or application architecture?
+- Are you trying to identify where field mappings are managed vs. unmanaged?
 
 ---
 
 ## Summary
 
-**Unmanaged Layer = Layer not controlled by framework/system**
-- Manual lifecycle management
-- Direct instantiation
-- Limited framework integration
-- Independent operation
+**Unmanaged Layer** generally means:
+- ✅ Components you control and manage manually
+- ✅ Not automatically handled by a framework
+- ✅ Requires explicit lifecycle and resource management
+- ✅ Can be modified directly
 
-**Common in:**
-- Legacy code
-- Utilities
-- Third-party integrations
-- Performance-critical components
+**Managed Layer** generally means:
+- ✅ Framework handles lifecycle automatically
+- ✅ Configuration-driven
+- ✅ Dependency injection
+- ✅ Less manual intervention needed
 
-**Consider:**
-- Whether it should remain unmanaged
-- Migration to managed approach
-- Impact on testing and maintenance
+---
+
+**Next Steps:**
+If you can provide more context about your specific use case (framework, system type, or where you encountered this term), I can give you a more targeted explanation!
