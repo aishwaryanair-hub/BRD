@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Cache Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+        .info {
+            background: #e3f2fd;
+            border-left-color: #2196F3;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Browser Cache Diagnostic Tool</h1>
+        
+        <div class="test-section info">
+            <h3>Page Info</h3>
+            <p><strong>Page Load Time:</strong> <span id="loadTime"></span></p>
+            <p><strong>Page Version:</strong> <span id="pageVersion">v2.0.1</span></p>
+            <p><strong>Current URL:</strong> <code id="currentUrl"></code></p>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 1: Check if Page is Cached</h3>
+            <button onclick="testPageCache()">Test Page Cache</button>
+            <div id="cacheResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Check Response Headers</h3>
+            <button onclick="checkHeaders()">Check Headers</button>
+            <div id="headersResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Service Worker Status</h3>
+            <button onclick="checkServiceWorker()">Check Service Worker</button>
+            <div id="swResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Storage Status</h3>
+            <button onclick="checkStorage()">Check Storage</button>
+            <div id="storageResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 5: Clear All Caches</h3>
+            <button onclick="clearAllCaches()" style="background: #f44336;">Clear All Caches</button>
+            <div id="clearResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Quick Actions</h3>
+            <button onclick="hardRefresh()">Hard Refresh Page</button>
+            <button onclick="openDevTools()">Open DevTools</button>
+            <button onclick="runAllTests()">Run All Tests</button>
+        </div>
+    </div>
+
+    <script>
+        // Set page load time
+        document.getElementById('loadTime').textContent = new Date().toLocaleString();
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        // Test if page is cached
+        async function testPageCache() {
+            const resultDiv = document.getElementById('cacheResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const url = window.location.href;
+                const timestamp = Date.now();
+                
+                // Normal fetch (may use cache)
+                const normalStart = performance.now();
+                const normalResponse = await fetch(url);
+                const normalTime = performance.now() - normalStart;
+                
+                // No-cache fetch
+                const nocacheStart = performance.now();
+                const nocacheResponse = await fetch(url, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const nocacheTime = performance.now() - nocacheStart;
+                
+                const normalText = await normalResponse.text();
+                const nocacheText = await nocacheResponse.text();
+                
+                let result = `Normal Fetch:\n`;
+                result += `  Status: ${normalResponse.status}\n`;
+                result += `  Time: ${normalTime.toFixed(2)}ms\n`;
+                result += `  Size: ${normalText.length} bytes\n\n`;
+                
+                result += `No-Cache Fetch:\n`;
+                result += `  Status: ${nocacheResponse.status}\n`;
+                result += `  Time: ${nocacheTime.toFixed(2)}ms\n`;
+                result += `  Size: ${nocacheText.length} bytes\n\n`;
+                
+                if (normalTime < nocacheTime * 0.5) {
+                    result += `⚠️ WARNING: Normal fetch was much faster - likely using cache!\n`;
+                }
+                
+                if (normalText !== nocacheText) {
+                    result += `⚠️ WARNING: Content differs between cached and fresh fetch!\n`;
+                } else {
+                    result += `✅ Content matches between both fetches\n`;
+                }
+                
+                resultDiv.textContent = result;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Check response headers
+        async function checkHeaders() {
+            const resultDiv = document.getElementById('headersResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Checking headers...';
+            
+            try {
+                const response = await fetch(window.location.href, {cache: 'no-store'});
+                let result = 'Response Headers:\n\n';
+                
+                const cacheHeaders = [
+                    'cache-control',
+                    'etag',
+                    'last-modified',
+                    'expires',
+                    'pragma',
+                    'vary'
+                ];
+                
+                cacheHeaders.forEach(header => {
+                    const value = response.headers.get(header);
+                    if (value) {
+                        result += `${header}: ${value}\n`;
+                    }
+                });
+                
+                if (!response.headers.get('cache-control')) {
+                    result += '\n⚠️ No Cache-Control header found!\n';
+                }
+                
+                resultDiv.textContent = result;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Check Service Worker
+        async function checkServiceWorker() {
+            const resultDiv = document.getElementById('swResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Checking Service Worker...';
+            
+            let result = '';
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    result += `Service Workers Found: ${registrations.length}\n\n`;
+                    
+                    if (registrations.length > 0) {
+                        registrations.forEach((reg, index) => {
+                            result += `SW #${index + 1}:\n`;
+                            result += `  Scope: ${reg.scope}\n`;
+                            result += `  Active: ${reg.active ? 'Yes' : 'No'}\n`;
+                            result += `  Installing: ${reg.installing ? 'Yes' : 'No'}\n`;
+                            result += `  Waiting: ${reg.waiting ? 'Yes' : 'No'}\n\n`;
+                        });
+                        result += `⚠️ Service Worker is active and may be caching content!\n`;
+                    } else {
+                        result += `✅ No Service Workers registered\n`;
+                    }
+                    
+                    // Check cache storage
+                    const cacheNames = await caches.keys();
+                    result += `\nCache Storage: ${cacheNames.length} cache(s)\n`;
+                    cacheNames.forEach(name => {
+                        result += `  - ${name}\n`;
+                    });
+                    
+                    if (cacheNames.length > 0) {
+                        result += `\n⚠️ Cache Storage contains ${cacheNames.length} cache(s)!\n`;
+                    }
+                } catch (error) {
+                    result = `Error checking Service Worker: ${error.message}`;
+                }
+            } else {
+                result = '✅ Service Workers not supported (or disabled)';
+            }
+            
+            resultDiv.textContent = result;
+        }
+
+        // Check storage
+        function checkStorage() {
+            const resultDiv = document.getElementById('storageResult');
+            resultDiv.style.display = 'block';
+            
+            let result = 'Storage Status:\n\n';
+            
+            // LocalStorage
+            const lsKeys = Object.keys(localStorage);
+            result += `LocalStorage: ${lsKeys.length} item(s)\n`;
+            if (lsKeys.length > 0) {
+                lsKeys.forEach(key => {
+                    result += `  - ${key}\n`;
+                });
+            }
+            
+            // SessionStorage
+            const ssKeys = Object.keys(sessionStorage);
+            result += `\nSessionStorage: ${ssKeys.length} item(s)\n`;
+            if (ssKeys.length > 0) {
+                ssKeys.forEach(key => {
+                    result += `  - ${key}\n`;
+                });
+            }
+            
+            // IndexedDB
+            if ('indexedDB' in window) {
+                indexedDB.databases().then(databases => {
+                    result += `\nIndexedDB: ${databases.length} database(s)\n`;
+                    databases.forEach(db => {
+                        result += `  - ${db.name} (v${db.version})\n`;
+                    });
+                    resultDiv.textContent = result;
+                }).catch(err => {
+                    result += `\nError checking IndexedDB: ${err.message}`;
+                    resultDiv.textContent = result;
+                });
+            } else {
+                result += `\nIndexedDB: Not supported`;
+                resultDiv.textContent = result;
+            }
+        }
+
+        // Clear all caches
+        async function clearAllCaches() {
+            const resultDiv = document.getElementById('clearResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Clearing caches...';
+            
+            let result = 'Cache Clearing Results:\n\n';
+            
+            try {
+                // Clear Service Worker caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (const name of cacheNames) {
+                        await caches.delete(name);
+                        result += `✅ Deleted cache: ${name}\n`;
+                    }
+                }
+                
+                // Unregister Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        result += `✅ Unregistered Service Worker: ${registration.scope}\n`;
+                    }
+                }
+                
+                // Clear localStorage
+                localStorage.clear();
+                result += `✅ Cleared LocalStorage\n`;
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                result += `✅ Cleared SessionStorage\n`;
+                
+                // Clear IndexedDB
+                if ('indexedDB' in window) {
+                    const databases = await indexedDB.databases();
+                    for (const db of databases) {
+                        await new Promise((resolve, reject) => {
+                            const deleteReq = indexedDB.deleteDatabase(db.name);
+                            deleteReq.onsuccess = () => resolve();
+                            deleteReq.onerror = () => reject(deleteReq.error);
+                            deleteReq.onblocked = () => resolve(); // Still resolve if blocked
+                        });
+                        result += `✅ Deleted IndexedDB: ${db.name}\n`;
+                    }
+                }
+                
+                result += `\n✅ All caches cleared! Please refresh the page.`;
+                resultDiv.className = 'result';
+            } catch (error) {
+                result += `\n❌ Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+            
+            resultDiv.textContent = result;
+        }
+
+        // Hard refresh
+        function hardRefresh() {
+            if (confirm('This will perform a hard refresh. Continue?')) {
+                window.location.reload(true);
+            }
+        }
+
+        // Open DevTools hint
+        function openDevTools() {
+            alert('Press F12 to open DevTools, then:\n1. Go to Network tab\n2. Check "Disable cache"\n3. Reload page');
+        }
+
+        // Run all tests
+        function runAllTests() {
+            testPageCache();
+            setTimeout(checkHeaders, 500);
+            setTimeout(checkServiceWorker, 1000);
+            setTimeout(checkStorage, 1500);
+        }
+
+        // Auto-run on load (optional)
+        // runAllTests();
+    </script>
+</body>
+</html>
