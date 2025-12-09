@@ -1,0 +1,157 @@
+{
+  "query_examples": {
+    "dataverse_odata": {
+      "method": "GET",
+      "uri": "https://{environment}.crm.dynamics.com/api/data/v9.2/workflows",
+      "headers": {
+        "Authorization": "Bearer {accessToken}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0",
+        "Accept": "application/json",
+        "Prefer": "odata.include-annotations=\"*\""
+      },
+      "query_parameters": {
+        "$filter": "name eq 'Flow Name 1' or name eq 'Flow Name 2' or name eq 'Flow Name 3'",
+        "$select": "name,workflowid,statecode,statuscode,createdon,modifiedon,description",
+        "$orderby": "name"
+      },
+      "description": "Query 3 flows by name using OData filter with OR conditions"
+    },
+    "by_workflow_ids": {
+      "method": "GET",
+      "uri": "https://{environment}.crm.dynamics.com/api/data/v9.2/workflows",
+      "headers": {
+        "Authorization": "Bearer {accessToken}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0",
+        "Accept": "application/json"
+      },
+      "query_parameters": {
+        "$filter": "workflowid eq '{guid-1}' or workflowid eq '{guid-2}' or workflowid eq '{guid-3}'",
+        "$select": "name,workflowid,statecode,statuscode,createdon,modifiedon,description"
+      },
+      "description": "Query 3 flows by their workflow IDs (GUIDs)"
+    },
+    "power_automate_api": {
+      "method": "GET",
+      "uri": "https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/{environmentId}/flows",
+      "headers": {
+        "Authorization": "Bearer {accessToken}"
+      },
+      "query_parameters": {
+        "$filter": "properties/displayName eq 'Flow Name 1' or properties/displayName eq 'Flow Name 2' or properties/displayName eq 'Flow Name 3'"
+      },
+      "description": "Query using Power Automate Management API"
+    },
+    "graph_api_batch": {
+      "method": "POST",
+      "uri": "https://graph.microsoft.com/v1.0/$batch",
+      "headers": {
+        "Authorization": "Bearer {accessToken}",
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "requests": [
+          {
+            "id": "1",
+            "method": "GET",
+            "url": "/applications/{appId}/flows/{flowId1}"
+          },
+          {
+            "id": "2",
+            "method": "GET",
+            "url": "/applications/{appId}/flows/{flowId2}"
+          },
+          {
+            "id": "3",
+            "method": "GET",
+            "url": "/applications/{appId}/flows/{flowId3}"
+          }
+        ]
+      },
+      "description": "Query 3 flows using Microsoft Graph API batch request"
+    }
+  },
+  "power_automate_flow_steps": {
+    "step_1": {
+      "action": "Initialize Variable",
+      "name": "FlowNames",
+      "type": "Array",
+      "value": [
+        "Flow Name 1",
+        "Flow Name 2",
+        "Flow Name 3"
+      ]
+    },
+    "step_2": {
+      "action": "HTTP Request",
+      "method": "GET",
+      "uri": "https://{environment}.crm.dynamics.com/api/data/v9.2/workflows",
+      "headers": {
+        "Authorization": "Bearer @{body('Get_access_token')?['access_token']}",
+        "OData-MaxVersion": "4.0",
+        "OData-Version": "4.0",
+        "Accept": "application/json"
+      },
+      "queries": {
+        "$filter": "name eq 'Flow Name 1' or name eq 'Flow Name 2' or name eq 'Flow Name 3'",
+        "$select": "name,workflowid,statecode,statuscode,createdon,modifiedon,description",
+        "$orderby": "name"
+      }
+    },
+    "step_3": {
+      "action": "Parse JSON",
+      "content": "@{body('HTTP_Request')}",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "workflowid": {
+                  "type": "string"
+                },
+                "statecode": {
+                  "type": "integer"
+                },
+                "statuscode": {
+                  "type": "integer"
+                },
+                "createdon": {
+                  "type": "string"
+                },
+                "modifiedon": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "step_4": {
+      "action": "Apply to Each",
+      "input": "@body('Parse_JSON')?['value']",
+      "actions": {
+        "action": "Process Flow Data",
+        "description": "Process each flow result here"
+      }
+    }
+  },
+  "notes": [
+    "Replace {environment} with your Dataverse environment URL",
+    "Replace {accessToken} with your authentication token",
+    "Replace {environmentId} with your Power Platform environment ID",
+    "Replace {appId} and {flowId1/2/3} with actual IDs if using Graph API",
+    "Replace 'Flow Name 1/2/3' with actual flow names",
+    "Ensure you have proper permissions: Flow.Read.All or Workflow.Read"
+  ]
+}
